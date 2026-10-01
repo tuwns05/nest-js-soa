@@ -1,8 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, PrimaryColumn } from "typeorm";
 
-@Entity({ name: 'SinhVien' })
+@Entity({ name: 'SINHVIEN' })
 export class SinhVien {
-    @PrimaryGeneratedColumn()
+    @PrimaryColumn({ type: 'varchar', length: 20 })
     MaSv: string;
     @Column({ type: 'nvarchar', nullable: false })
     HoTen: string;
