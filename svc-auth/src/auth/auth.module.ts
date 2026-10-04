@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import { AuthController } from './auth.controller.js';
-import { HttpModule } from '@nestjs/axios';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth.guard.js';
@@ -12,7 +11,6 @@ export const jwtContants = {
 
 @Module({
   imports: [
-    HttpModule,
     JwtModule.register({
       global: true,
       secret: jwtContants.secret,
