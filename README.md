@@ -25,24 +25,3 @@ Cung cấp API thêm, xem, sửa, xóa sản phẩm; yêu cầu JWT do BTH2 cấ
 
 **Áp dụng SOA:** service chạy độc lập tại cổng `3005`, quản lý dữ liệu trong `SOA_Product`. Product kiểm tra JWT mà không truy vấn database tài khoản. Mỗi service có API riêng, giao tiếp với client qua HTTP; mã kết nối database dùng chung nhưng mỗi tiến trình có connection pool riêng.
 
-## Chạy và thử
-
-Yêu cầu Node.js 24, SQL Server, ODBC Driver 17, Windows Authentication và hai database đã có bảng tương ứng. Mặc định SQL Server là `LAPTOP-TUNWS\VIETTUAN`.
-
-Mở hai terminal từ thư mục gốc, mỗi terminal chạy một service:
-
-```powershell
-# Terminal 1
-cd svc-auth
-npm.cmd install
-npm.cmd run start:dev
-```
-
-```powershell
-# Terminal 2
-cd svc-product
-npm.cmd install
-npm.cmd run start:dev
-```
-
-Đăng nhập tại `POST http://localhost:3004/auth/login`, lấy `access_token`, rồi gửi `Authorization: Bearer <token>` khi gọi API sản phẩm. Có thể thử bằng Postman hoặc Swagger; token hiện có hiệu lực **60 giây**.
