@@ -1,45 +1,48 @@
-# Bài thực hành số 2: Router, Middleware và JWT
+# Thực hành kiến trúc hướng dịch vụ (SOA)
 
-RESTful API NestJS minh họa đăng nhập, phát hành JWT và bảo vệ API.
+Project NestJS gồm các REST API, mỗi service phụ trách một nghiệp vụ, chạy trên cổng riêng và kết nối database SQL Server riêng.
 
-## API
+## Các bài thực hành
 
-| Method | Endpoint | Chức năng |
-|---|---|---|
-| `POST` | `/auth/login` | Nhận `username`, `password`; kiểm tra user trong database và trả `access_token`. |
-| `GET` | `/auth/profile` | Yêu cầu `Authorization: Bearer <access_token>`; trả về `Hello World`. |
+| Bài | Service | Cổng mặc định | Database | Tài liệu | Swagger |
+| --- | --- | --- | --- | --- | --- |
+| BTH2: Router, Middleware và JWT | `svc-auth` | `3004` | `SOA_BTH` | [Bài thực hành 2](svc-auth/README.md) | [Swagger Auth](http://localhost:3004/api) |
+| BTH3: Quản lý sản phẩm | `svc-product` | `3005` | `SOA_Product` | [Bài thực hành 3](svc-product/README.md) | [Swagger Product](http://localhost:3005/api) |
 
-## Vị trí code
+### BTH2: Dịch vụ xác thực
 
-- [Router và các endpoint](svc-auth/src/auth/auth.controller.ts)
-- [Kiểm tra tài khoản và tạo JWT](svc-auth/src/auth/auth.service.ts)
-- [AuthGuard xác thực JWT trong Bearer token](svc-auth/src/auth/auth.guard.ts)
-- [Cấu hình JWT và thời hạn token](svc-auth/src/auth/auth.module.ts)
-- [LoggerMiddleware ghi method, URL và status của request](svc-auth/src/middleware/logger.middleware.ts)
-- [Đăng ký middleware cho AuthController](svc-auth/src/app.module.ts)
-- [Kết nối SQL Server dùng chung](shared/database/index.js)
+Đăng nhập, cấp JWT, bảo vệ API bằng guard và ghi log request bằng middleware.
 
-## Chạy và thử API
+**Code mở cổng `3004`:** [`app.listen(process.env.PORT ?? 3004)` trong main.ts](svc-auth/src/main.ts#L19).
 
-Trong PowerShell:
+**Áp dụng SOA:** đóng gói nghiệp vụ xác thực thành service độc lập tại cổng `3004`, quản lý tài khoản trong `SOA_BTH`. Token được cấp có thể dùng ở service sản phẩm, giúp tái sử dụng chức năng xác thực.
+
+### BTH3: Dịch vụ quản lý sản phẩm
+
+Cung cấp API thêm, xem, sửa, xóa sản phẩm; yêu cầu JWT do BTH2 cấp.
+
+**Code mở cổng `3005`:** [`app.listen(process.env.PORT ?? 3005)` trong main.ts](svc-product/src/main.ts#L11).
+
+**Áp dụng SOA:** service chạy độc lập tại cổng `3005`, quản lý dữ liệu trong `SOA_Product`. Product kiểm tra JWT mà không truy vấn database tài khoản. Mỗi service có API riêng, giao tiếp với client qua HTTP; mã kết nối database dùng chung nhưng mỗi tiến trình có connection pool riêng.
+
+## Chạy và thử
+
+Yêu cầu Node.js 24, SQL Server, ODBC Driver 17, Windows Authentication và hai database đã có bảng tương ứng. Mặc định SQL Server là `LAPTOP-TUNWS\VIETTUAN`.
+
+Mở hai terminal từ thư mục gốc, mỗi terminal chạy một service:
 
 ```powershell
+# Terminal 1
 cd svc-auth
 npm.cmd install
 npm.cmd run start:dev
 ```
 
-SQL Server cần có database `SOA_BTH`, instance `LAPTOP-TUNWS\VIETTUAN`, Windows Authentication và ODBC Driver 17. Swagger: [http://localhost:3004/api](http://localhost:3004/api).
+```powershell
+# Terminal 2
+cd svc-product
+npm.cmd install
+npm.cmd run start:dev
+```
 
-Đăng nhập bằng `POST /auth/login`, sao chép `access_token`, rồi gọi `GET /auth/profile` với header `Authorization: Bearer <access_token>`.
-
-## Bảng User
-
-| Cột | Kiểu dữ liệu |
-|---|---|
-| `IdUser` | `INT PRIMARY KEY` |
-| `UserName` | `VARCHAR(255)` |
-| `Password` | `VARCHAR(255)` |
-| `Token` | `VARCHAR(255)` |
-
-**Lưu ý:** Middleware hiện ghi log request; việc xác thực JWT do `AuthGuard` thực hiện. API hiện so sánh password nhận được trực tiếp với database, chưa mã hóa Base64/MD5 ở client; JWT trả về cũng chưa được lưu vào cột `Token`.
+Đăng nhập tại `POST http://localhost:3004/auth/login`, lấy `access_token`, rồi gửi `Authorization: Bearer <token>` khi gọi API sản phẩm. Có thể thử bằng Postman hoặc Swagger; token hiện có hiệu lực **60 giây**.

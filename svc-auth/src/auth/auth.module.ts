@@ -13,7 +13,7 @@ export const jwtContants = {
   imports: [
     JwtModule.register({
       global: true,
-      secret: jwtContants.secret,
+      secret: process.env.JWT_SECRET ?? jwtContants.secret,
       signOptions: { expiresIn: '60s' }
     })
   ],
