@@ -8,9 +8,6 @@ Service `svc-product` cung cấp REST API thêm, xem, sửa và xóa sản phẩ
 | Database | `SOA_Product`, bảng `dbo.products` |
 | Swagger | [http://localhost:3005/api](http://localhost:3005/api) |
 
-## Vì sao áp dụng SOA?
-
-Product phụ trách riêng nghiệp vụ sản phẩm, chạy trên cổng và database riêng với auth. Service tự kiểm tra JWT do auth cấp, không truy vấn database tài khoản. Hai service có thể chạy và phát triển riêng; mã kết nối database dùng chung nhưng mỗi tiến trình mở connection pool riêng.
 
 ## Chạy service
 
